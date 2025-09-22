@@ -11,6 +11,8 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import ClientDashboard from "./pages/ClientDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminBriefManagement from "./pages/AdminBriefManagement";
+import NotificationsPage from "./pages/NotificationsPage";
 import CreateBrief from "./pages/CreateBrief";
 import BriefDetails from "./pages/BriefDetails";
 import NotFound from "./pages/NotFound";
@@ -70,6 +72,23 @@ const AppRoutes = () => {
       <Route path="/admin/brief/:id" element={
         <ProtectedRoute requiredRole="admin">
           <BriefDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/brief/:id/manage" element={
+        <ProtectedRoute requiredRole="admin">
+          <AdminBriefManagement />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/notifications" element={
+        <ProtectedRoute requiredRole="admin">
+          <NotificationsPage />
+        </ProtectedRoute>
+      } />
+      
+      {/* Notifications routes */}
+      <Route path="/notifications" element={
+        <ProtectedRoute requiredRole="client">
+          <NotificationsPage />
         </ProtectedRoute>
       } />
       
