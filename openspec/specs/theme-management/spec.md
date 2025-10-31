@@ -1,5 +1,8 @@
-## ADDED Requirements
+# theme-management Specification
 
+## Purpose
+Provides users with the ability to switch between light and dark visual themes throughout the application. This capability enhances user experience by reducing eye strain in low-light environments and aligning with modern design practices. Theme preferences are persisted across browser sessions using localStorage.
+## Requirements
 ### Requirement: Theme Selection
 The system SHALL provide users with the ability to toggle between light and dark themes.
 
