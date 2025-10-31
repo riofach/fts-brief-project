@@ -79,7 +79,7 @@ const AdminDashboard: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="card-gradient shadow-md">
+          <Card className="bg-card shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -91,7 +91,7 @@ const AdminDashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="card-gradient shadow-md">
+          <Card className="bg-card shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -103,7 +103,7 @@ const AdminDashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="card-gradient shadow-md">
+          <Card className="bg-card shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -115,7 +115,7 @@ const AdminDashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="card-gradient shadow-md">
+          <Card className="bg-card shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -129,7 +129,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Filters and Briefs List */}
-        <Card className="card-gradient shadow-lg">
+        <Card className="bg-card shadow-lg">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>

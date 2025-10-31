@@ -75,7 +75,7 @@ const LoginPage: React.FC = () => {
       {/* Login Form */}
       <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
-          <Card className="card-gradient shadow-lg">
+          <Card className="bg-card shadow-lg">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl text-center">Sign in</CardTitle>
               <CardDescription className="text-center">

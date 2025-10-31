@@ -73,7 +73,7 @@ const LandingPage: React.FC = () => {
           </div>
 
           <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="card-gradient border-0 shadow-md">
+            <Card className="bg-card border shadow-md">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 hero-gradient rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Code className="h-6 w-6 text-primary-foreground" />
@@ -85,7 +85,7 @@ const LandingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="card-gradient border-0 shadow-md">
+            <Card className="bg-card border shadow-md">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 hero-gradient rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Palette className="h-6 w-6 text-primary-foreground" />
@@ -97,7 +97,7 @@ const LandingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="card-gradient border-0 shadow-md">
+            <Card className="bg-card border shadow-md">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 hero-gradient rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Rocket className="h-6 w-6 text-primary-foreground" />
@@ -109,7 +109,7 @@ const LandingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="card-gradient border-0 shadow-md">
+            <Card className="bg-card border shadow-md">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 hero-gradient rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Users className="h-6 w-6 text-primary-foreground" />
@@ -127,7 +127,7 @@ const LandingPage: React.FC = () => {
       {/* CTA Section */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="card-gradient rounded-2xl p-8 sm:p-16 text-center shadow-lg">
+          <div className="bg-card rounded-2xl p-8 sm:p-16 text-center shadow-lg border">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               Ready to Start Your Project?
             </h2>

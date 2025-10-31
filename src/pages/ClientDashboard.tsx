@@ -66,7 +66,7 @@ const ClientDashboard: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="card-gradient shadow-md">
+          <Card className="bg-card shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -78,7 +78,7 @@ const ClientDashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="card-gradient shadow-md">
+          <Card className="bg-card shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -90,7 +90,7 @@ const ClientDashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="card-gradient shadow-md">
+          <Card className="bg-card shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -102,7 +102,7 @@ const ClientDashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="card-gradient shadow-md">
+          <Card className="bg-card shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -116,7 +116,7 @@ const ClientDashboard: React.FC = () => {
         </div>
 
         {/* Briefs List */}
-        <Card className="card-gradient shadow-lg">
+        <Card className="bg-card shadow-lg">
           <CardHeader>
             <CardTitle>My Project Briefs</CardTitle>
             <CardDescription>

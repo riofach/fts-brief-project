@@ -127,7 +127,7 @@ const BriefDetails: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Project Details */}
-            <Card className="card-gradient shadow-lg">
+            <Card className="bg-card shadow-lg">
               <CardHeader>
                 <CardTitle>Project Details</CardTitle>
               </CardHeader>
@@ -235,7 +235,7 @@ const BriefDetails: React.FC = () => {
 
             {/* Deliverables */}
             {brief.deliverables.length > 0 && (
-              <Card className="card-gradient shadow-lg">
+              <Card className="bg-card shadow-lg">
                 <CardHeader>
                   <CardTitle>Deliverables</CardTitle>
                   <CardDescription>
@@ -280,7 +280,7 @@ const BriefDetails: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Project Info */}
-            <Card className="card-gradient shadow-md">
+            <Card className="bg-card shadow-md">
               <CardHeader>
                 <CardTitle className="text-lg">Project Info</CardTitle>
               </CardHeader>
@@ -309,7 +309,7 @@ const BriefDetails: React.FC = () => {
             </Card>
 
             {/* Discussion */}
-            <Card className="card-gradient shadow-md">
+            <Card className="bg-card shadow-md">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
                   <MessageSquare className="mr-2 h-5 w-5" />

@@ -133,7 +133,7 @@ const AdminBriefManagement: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Status Management */}
-          <Card className="card-gradient shadow-lg">
+          <Card className="bg-card shadow-lg">
             <CardHeader>
               <CardTitle>Project Status</CardTitle>
               <CardDescription>
@@ -189,7 +189,7 @@ const AdminBriefManagement: React.FC = () => {
           </Card>
 
           {/* Add Deliverable */}
-          <Card className="card-gradient shadow-lg">
+          <Card className="bg-card shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Plus className="mr-2 h-5 w-5" />
@@ -265,7 +265,7 @@ const AdminBriefManagement: React.FC = () => {
 
         {/* Current Deliverables */}
         {brief.deliverables.length > 0 && (
-          <Card className="card-gradient shadow-lg mt-8">
+          <Card className="bg-card shadow-lg mt-8">
             <CardHeader>
               <CardTitle>Current Deliverables</CardTitle>
               <CardDescription>

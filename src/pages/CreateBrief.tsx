@@ -144,7 +144,7 @@ const CreateBrief: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
-          <Card className="card-gradient shadow-lg">
+          <Card className="bg-card shadow-lg">
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
               <CardDescription>
@@ -217,7 +217,7 @@ const CreateBrief: React.FC = () => {
           </Card>
 
           {/* Design Preferences */}
-          <Card className="card-gradient shadow-lg">
+          <Card className="bg-card shadow-lg">
             <CardHeader>
               <CardTitle>Design Preferences</CardTitle>
               <CardDescription>
@@ -300,7 +300,7 @@ const CreateBrief: React.FC = () => {
           </Card>
 
           {/* References and Assets */}
-          <Card className="card-gradient shadow-lg">
+          <Card className="bg-card shadow-lg">
             <CardHeader>
               <CardTitle>References and Assets</CardTitle>
               <CardDescription>

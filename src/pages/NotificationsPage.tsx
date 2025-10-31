@@ -80,7 +80,7 @@ const NotificationsPage: React.FC = () => {
         </div>
 
         {/* Notifications List */}
-        <Card className="card-gradient shadow-lg">
+        <Card className="bg-card shadow-lg">
           <CardHeader>
             <CardTitle>All Notifications</CardTitle>
             <CardDescription>
