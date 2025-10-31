@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -19,18 +19,20 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>('light');
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Initialize theme from localStorage on mount
-  useEffect(() => {
+  const [theme, setThemeState] = useState<Theme>(() => {
+    // Initialize theme immediately from localStorage or default to 'light'
     const storedTheme = localStorage.getItem('theme') as Theme | null;
     const initialTheme = storedTheme || 'light';
     
-    setThemeState(initialTheme);
-    applyTheme(initialTheme);
-    setIsInitialized(true);
-  }, []);
+    // Apply theme class to HTML element immediately
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    return initialTheme;
+  });
 
   const applyTheme = (newTheme: Theme) => {
     const htmlElement = document.documentElement;
@@ -53,10 +55,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
   };
-
-  if (!isInitialized) {
-    return <>{children}</>;
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
