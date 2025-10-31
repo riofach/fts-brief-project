@@ -11,11 +11,14 @@ import {
   Zap,
   Shield,
   BarChart3,
-  MessageSquare
+  MessageSquare,
+  Briefcase,
+  Award
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
+import { AnimatedStatCard } from '@/components/common/AnimatedStatCard';
 
 const LandingPage: React.FC = () => {
   return (
@@ -102,26 +105,42 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 border-y bg-muted/30">
+      {/* Stats Section - Animated */}
+      <section className="py-20 border-y bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-foreground mb-2">500+</div>
-              <div className="text-sm text-muted-foreground">Projects Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-foreground mb-2">200+</div>
-              <div className="text-sm text-muted-foreground">Active Clients</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-foreground mb-2">50+</div>
-              <div className="text-sm text-muted-foreground">Team Members</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl lg:text-5xl font-bold text-foreground mb-2">15+</div>
-              <div className="text-sm text-muted-foreground">Years Experience</div>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+            <AnimatedStatCard
+              icon={CheckCircle2}
+              value={500}
+              suffix="+"
+              label="Projects Completed"
+              delay={0}
+              iconColor="text-primary"
+            />
+            <AnimatedStatCard
+              icon={Users}
+              value={200}
+              suffix="+"
+              label="Active Clients"
+              delay={0.1}
+              iconColor="text-success"
+            />
+            <AnimatedStatCard
+              icon={Briefcase}
+              value={50}
+              suffix="+"
+              label="Team Members"
+              delay={0.2}
+              iconColor="text-warning"
+            />
+            <AnimatedStatCard
+              icon={Award}
+              value={15}
+              suffix="+"
+              label="Years Experience"
+              delay={0.3}
+              iconColor="text-info"
+            />
           </div>
         </div>
       </section>
