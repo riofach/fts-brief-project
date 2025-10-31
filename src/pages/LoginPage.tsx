@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { Navbar } from '@/components/layout/Navbar';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -53,24 +54,7 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Navigation */}
-      <nav className="border-b bg-card/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Home</span>
-              </Link>
-            </div>
-            <div className="flex items-center">
-              <div className="w-8 h-8 hero-gradient rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">FTS</span>
-              </div>
-              <span className="ml-3 font-semibold text-foreground">Brief Builder</span>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Login Form */}
       <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
