@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Code, Palette, Rocket, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 const LandingPage: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const LandingPage: React.FC = () => {
               <span className="ml-3 font-semibold text-foreground">PT Fujiyama Technology Solutions</span>
             </div>
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               <Link to="/login">
                 <Button variant="ghost">Login</Button>
               </Link>
