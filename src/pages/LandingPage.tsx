@@ -238,11 +238,14 @@ const LandingPage: React.FC = () => {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
 						<div>
-							<div className="flex items-center mb-4">
-								<div className="w-10 h-10 hero-gradient rounded-xl flex items-center justify-center shadow-lg">
-									<span className="text-primary-foreground font-bold text-lg">FTS</span>
-								</div>
-								<span className="ml-3 font-semibold text-foreground text-lg">FTS</span>
+							<div className="mb-4">
+								<Link to="/">
+									<img 
+										src="/images/logo.webp" 
+										alt="FTS Logo" 
+										className="h-10 w-auto"
+									/>
+								</Link>
 							</div>
 							<p className="text-muted-foreground text-sm leading-relaxed">
 								Leading web development company specializing in innovative digital solutions for
