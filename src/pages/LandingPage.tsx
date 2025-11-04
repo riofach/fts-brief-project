@@ -240,11 +240,7 @@ const LandingPage: React.FC = () => {
 						<div>
 							<div className="mb-4">
 								<Link to="/">
-									<img 
-										src="/images/logo.webp" 
-										alt="FTS Logo" 
-										className="h-10 w-auto"
-									/>
+									<img src="/images/logo.webp" alt="FTS Logo" className="w-32" />
 								</Link>
 							</div>
 							<p className="text-muted-foreground text-sm leading-relaxed">
