@@ -510,9 +510,9 @@
 
 - [x] 12.1 Create `backend/.env.example` as reference
 - [x] 12.2 Document API endpoints with response formats
-- [ ] 12.3 Create Postman/Insomnia collection (optional, for easy testing)
+<!-- - [ ] 12.3 Create Postman/Insomnia collection (optional, for easy testing) -->
 - [x] 12.4 Ensure backend returns consistent error format
-- [ ] 12.5 Prepare for TanStack Query integration guide (separate task)
+<!-- - [ ] 12.5 Prepare for TanStack Query integration guide (separate task) -->
 
 **Validation**:
 
