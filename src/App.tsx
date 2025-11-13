@@ -1,9 +1,8 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { useAuth } from "./contexts/AuthContext";
 import { AppProvider } from "./contexts/AppContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -18,77 +17,98 @@ import CreateBrief from "./pages/CreateBrief";
 import BriefDetails from "./pages/BriefDetails";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
-
 // Protected Route wrapper
-const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: 'client' | 'admin' }> = ({ 
+const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: 'ADMIN' | 'CLIENT' }> = ({ 
   children, 
   requiredRole 
 }) => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   
+  // Show nothing while loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+  
+  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" replace />;
   }
   
+  // Check role-based access
   if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace />;
+    // Redirect to appropriate dashboard based on user role
+    const redirectPath = user.role === 'ADMIN' ? '/admin' : '/dashboard';
+    return <Navigate to={redirectPath} replace />;
   }
   
   return <>{children}</>;
 };
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={user ? <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace /> : <LoginPage />} />
+      <Route path="/login" element={
+        isLoading ? (
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        ) : user ? (
+          <Navigate to={user.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />
+        ) : (
+          <LoginPage />
+        )
+      } />
       
       {/* Client routes */}
       <Route path="/dashboard" element={
-        <ProtectedRoute requiredRole="client">
+        <ProtectedRoute requiredRole="CLIENT">
           <ClientDashboard />
         </ProtectedRoute>
       } />
       <Route path="/create-brief" element={
-        <ProtectedRoute requiredRole="client">
+        <ProtectedRoute requiredRole="CLIENT">
           <CreateBrief />
         </ProtectedRoute>
       } />
       <Route path="/brief/:id" element={
-        <ProtectedRoute requiredRole="client">
+        <ProtectedRoute requiredRole="CLIENT">
           <BriefDetails />
         </ProtectedRoute>
       } />
       
       {/* Admin routes */}
       <Route path="/admin" element={
-        <ProtectedRoute requiredRole="admin">
+        <ProtectedRoute requiredRole="ADMIN">
           <AdminDashboard />
         </ProtectedRoute>
       } />
       <Route path="/admin/brief/:id" element={
-        <ProtectedRoute requiredRole="admin">
+        <ProtectedRoute requiredRole="ADMIN">
           <BriefDetails />
         </ProtectedRoute>
       } />
       <Route path="/admin/brief/:id/manage" element={
-        <ProtectedRoute requiredRole="admin">
+        <ProtectedRoute requiredRole="ADMIN">
           <AdminBriefManagement />
         </ProtectedRoute>
       } />
       <Route path="/admin/notifications" element={
-        <ProtectedRoute requiredRole="admin">
+        <ProtectedRoute requiredRole="ADMIN">
           <NotificationsPage />
         </ProtectedRoute>
       } />
       
       {/* Notifications routes */}
       <Route path="/notifications" element={
-        <ProtectedRoute requiredRole="client">
+        <ProtectedRoute requiredRole="CLIENT">
           <NotificationsPage />
         </ProtectedRoute>
       } />
@@ -100,21 +120,17 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <AppProvider>
-              <AppRoutes />
-            </AppProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ThemeProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AppProvider>
+          <AppRoutes />
+        </AppProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </ThemeProvider>
 );
 
 export default App;

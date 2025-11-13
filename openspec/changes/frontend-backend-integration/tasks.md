@@ -7,11 +7,11 @@
 - [x] 1.4 Create TypeScript types for API responses based on backend documentation
 
 ## 2. Authentication System Integration
-- [ ] 2.1 Replace mock AuthContext with TanStack Query authentication
-- [ ] 2.2 Implement login/logout API calls with JWT token management
-- [ ] 2.3 Add token refresh mechanism and automatic logout on expiry
-- [ ] 2.4 Update protected routes to use real authentication state
-- [ ] 2.5 Add loading and error states for authentication operations
+- [x] 2.1 Replace mock AuthContext with TanStack Query authentication
+- [x] 2.2 Implement login/logout API calls with JWT token management
+- [x] 2.3 Add token refresh mechanism and automatic logout on expiry
+- [x] 2.4 Update protected routes to use real authentication state
+- [x] 2.5 Add loading and error states for authentication operations
 
 ## 3. Brief Management Integration
 - [ ] 3.1 Create TanStack Query hooks for brief CRUD operations

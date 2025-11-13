@@ -26,26 +26,30 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    const success = await login(email, password);
-    
-    if (success) {
-      toast({
-        title: "Login successful!",
-        description: "Welcome to FTS Brief Builder",
-      });
+    try {
+      const result = await login(email, password);
       
-      // Navigate based on role - this will be handled by the auth context
-      const user = JSON.parse(localStorage.getItem('fts-user') || '{}');
-      if (user.role === 'admin') {
-        navigate('/admin');
+      if (result.success) {
+        toast({
+          title: "Login successful!",
+          description: "Welcome to FTS Brief Management System",
+        });
+        
+        // Navigation will be handled automatically by the auth context
+        // based on the user's role
       } else {
-        navigate('/dashboard');
+        setError(result.error || 'Login failed');
+        toast({
+          title: "Login failed",
+          description: result.error || "Please check your credentials and try again",
+          variant: "destructive",
+        });
       }
-    } else {
-      setError('Invalid email or password');
+    } catch (error: any) {
+      setError(error.message || 'An unexpected error occurred');
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again",
+        description: "Please try again",
         variant: "destructive",
       });
     }
@@ -127,8 +131,15 @@ const LoginPage: React.FC = () => {
                   <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
                     <span className="font-medium">Admin:</span>
                     <div className="text-right">
-                      <div>admin@fts.com</div>
+                      <div>admin@fts.biz.id</div>
                       <div>admin123</div>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
+                    <span className="font-medium">Sarah (Client):</span>
+                    <div className="text-right">
+                      <div>sarah@boutique.com</div>
+                      <div>design123</div>
                     </div>
                   </div>
                 </div>

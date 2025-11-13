@@ -59,12 +59,27 @@ api.interceptors.response.use(
           // Retry the original request
           return api(originalRequest);
         }
-      } catch (refreshError) {
-        // Refresh failed, redirect to login
+      } catch (refreshError: any) {
+        // Refresh failed, clear auth data and redirect
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        
+        // Emit auth error for proper handling
+        window.dispatchEvent(
+          new CustomEvent('auth-error', {
+            detail: { 
+              errorCode: refreshError.response?.data?.error?.code || 'TOKEN_INVALID', 
+              context: 'refresh' 
+            }
+          })
+        );
+        
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
+        
         return Promise.reject(refreshError);
       }
     }

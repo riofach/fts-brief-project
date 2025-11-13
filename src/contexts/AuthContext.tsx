@@ -1,15 +1,26 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, mockUsers } from '../data/mockData';
+import React, { createContext, useContext } from 'react';
+import { useAuth as useAuthQuery } from '../hooks/useAuth';
+import type { User } from '../api';
 
+// AuthContext types
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  refreshToken: () => Promise<void>;
   isLoading: boolean;
+  isLoggingIn: boolean;
+  isLoggingOut: boolean;
+  isRefreshing: boolean;
+  isAuthenticated: boolean;
+  loginError: any;
+  logoutError: any;
+  refreshError: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -18,46 +29,15 @@ export const useAuth = () => {
   return context;
 };
 
+// AuthProvider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check for stored auth on mount
-    const storedUser = localStorage.getItem('fts-user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const foundUser = mockUsers.find(u => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('fts-user', JSON.stringify(foundUser));
-      setIsLoading(false);
-      return true;
-    }
-    
-    setIsLoading(false);
-    return false;
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('fts-user');
-  };
-
+  const auth = useAuthQuery();
+  
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={auth}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export default AuthProvider;
