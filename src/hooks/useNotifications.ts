@@ -62,9 +62,26 @@ export const useMarkAllNotificationsRead = () => {
   });
 };
 
+// Hook to delete all read notifications
+export const useDeleteReadNotifications = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await api.delete('/notifications/read');
+      return handleApiResponse(response);
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      toast.success(`Deleted ${data.count} read notifications`);
+    },
+  });
+};
+
 export default {
   useNotifications,
   useUnreadNotificationsCount,
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
+  useDeleteReadNotifications,
 };

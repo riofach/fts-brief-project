@@ -1,23 +1,45 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Bell, MessageSquare, FileText, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Bell, MessageSquare, FileText, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/layout/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useApp } from '@/contexts/AppContext';
+import { useNotifications, useUnreadNotificationsCount, useMarkAllNotificationsRead, useDeleteReadNotifications, useMarkNotificationRead } from '@/hooks/useNotifications';
 import type { Notification } from '@/api/types';
+import { useBrief } from '@/hooks/useBriefs';
+import LoadingState from '@/components/common/LoadingState';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+
+// Component to fetch brief details for notification
+const BriefName: React.FC<{ briefId: string }> = ({ briefId }) => {
+  const { data: brief } = useBrief(briefId);
+  
+  if (!brief) return null;
+  
+  return <span>Project: {brief.projectName}</span>;
+};
 
 const NotificationsPage: React.FC = () => {
   const { user } = useAuth();
-  const { 
-    notifications, 
-    markNotificationAsRead, 
-    markAllNotificationsAsRead,
-    getBriefById,
-    unreadNotificationsCount
-  } = useApp();
+  
+  // Use real API hooks
+  const { data: notifications = [], isLoading: isLoadingNotifications } = useNotifications();
+  const { data: unreadCount = 0 } = useUnreadNotificationsCount();
+  const { mutate: markAllAsRead, isPending: isMarkingAll } = useMarkAllNotificationsRead();
+  const { mutate: markAsRead } = useMarkNotificationRead();
+  const { mutate: deleteRead, isPending: isDeletingRead } = useDeleteReadNotifications();
   
   // Note: Notifications are already filtered by user in the backend
   const sortedNotifications = [...notifications]
@@ -38,13 +60,26 @@ const NotificationsPage: React.FC = () => {
 
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
-      markNotificationAsRead(notification.id);
+      markAsRead(notification.id);
     }
   };
 
-  const markAllAsRead = () => {
-    markAllNotificationsAsRead();
+  const handleClearRead = () => {
+    deleteRead();
   };
+
+  if (isLoadingNotifications) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <LoadingState />
+        </div>
+      </div>
+    );
+  }
+
+  const hasReadNotifications = notifications.some(n => n.isRead);
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,13 +106,51 @@ const NotificationsPage: React.FC = () => {
                 Stay updated with your project progress
               </p>
             </div>
-            {unreadNotificationsCount > 0 && (
-              <div className="mt-4 sm:mt-0">
-                <Button onClick={markAllAsRead} variant="outline">
-                  Mark all as read ({unreadNotificationsCount})
+            <div className="mt-4 sm:mt-0 flex space-x-2">
+              {hasReadNotifications && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline"
+                      className="text-destructive hover:text-destructive"
+                      disabled={isDeletingRead}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Clear Read
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center">
+                        <AlertTriangle className="mr-2 h-4 w-4 text-destructive" />
+                        Clear Read Notifications
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete all read notifications? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleClearRead}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {isDeletingRead ? 'Deleting...' : 'Delete All'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              {unreadCount > 0 && (
+                <Button 
+                  onClick={() => markAllAsRead()} 
+                  variant="default"
+                  disabled={isMarkingAll}
+                >
+                  Mark all as read ({unreadCount})
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
@@ -104,8 +177,6 @@ const NotificationsPage: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 {sortedNotifications.map((notification) => {
-                  const brief = getBriefById(notification.briefId);
-                  
                   return (
                     <Link
                       key={notification.id}
@@ -137,8 +208,10 @@ const NotificationsPage: React.FC = () => {
                             </p>
                             
                             <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                              {brief && (
-                                <span>Project: {brief.projectName}</span>
+                              {notification.brief?.projectName ? (
+                                <span>Project: {notification.brief.projectName}</span>
+                              ) : (
+                                <BriefName briefId={notification.briefId} />
                               )}
                               <span>
                                 {new Date(notification.timestamp).toLocaleDateString()} at{' '}
