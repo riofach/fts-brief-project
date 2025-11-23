@@ -63,7 +63,9 @@ export type ErrorCode =
   | 'DISCUSSION_NOT_FOUND'
   | 'NOTIFICATION_NOT_FOUND'
   | 'ROUTE_NOT_FOUND'
-  | 'INTERNAL_SERVER_ERROR';
+  | 'INTERNAL_SERVER_ERROR'
+  | 'BRIEF_ALREADY_EXISTS'
+  | 'INVALID_STATUS_TRANSITION';
 
 // User types
 export interface User {

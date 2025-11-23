@@ -17,12 +17,11 @@ import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
-  const { getUnreadNotifications } = useApp();
+  const { unreadNotificationsCount } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  const unreadNotifications = user ? getUnreadNotifications() : [];
   const isAuthenticated = !!user;
 
   const handleLogout = () => {
@@ -81,12 +80,12 @@ export const Navbar: React.FC = () => {
                     variant="ghost"
                     size="icon"
                     className="relative"
-                    onClick={() => handleNavigation(user?.role === 'admin' ? '/admin/notifications' : '/notifications')}
+                    onClick={() => handleNavigation('/notifications')}
                   >
                     <Bell className="h-5 w-5" />
-                    {unreadNotifications.length > 0 && (
+                    {unreadNotificationsCount > 0 && (
                       <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                        {unreadNotifications.length}
+                        {unreadNotificationsCount}
                       </Badge>
                     )}
                   </Button>
@@ -168,12 +167,12 @@ export const Navbar: React.FC = () => {
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
-                    onClick={() => handleNavigation(user?.role === 'admin' ? '/admin/notifications' : '/notifications')}
+                    onClick={() => handleNavigation('/notifications')}
                   >
                     <Bell className="h-4 w-4 mr-2" />
                     Notifications
-                    {unreadNotifications.length > 0 && (
-                      <Badge className="ml-auto">{unreadNotifications.length}</Badge>
+                    {unreadNotificationsCount > 0 && (
+                      <Badge className="ml-auto">{unreadNotificationsCount}</Badge>
                     )}
                   </Button>
                   <Button

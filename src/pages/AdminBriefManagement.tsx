@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Upload, FileText, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,34 +11,64 @@ import { Separator } from '@/components/ui/separator';
 import { Navbar } from '@/components/layout/Navbar';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
-import { useApp } from '@/contexts/AppContext';
-import { Brief, Deliverable } from '@/data/mockData';
 import { toast } from '@/hooks/use-toast';
+import { useBrief, useUpdateBriefStatus, useAddDeliverable, useBriefDeliverables } from '@/api';
+import type { CreateDeliverableRequest, Deliverable } from '@/api';
 
 const AdminBriefManagement: React.FC = () => {
   const { id = '' } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { getBriefById, updateBriefStatus, addDeliverable } = useApp();
-  const navigate = useNavigate();
   
+  // Use TanStack Query hooks for real data
+  const { data: brief, isLoading: briefLoading, error: briefError } = useBrief(id);
+  const { data: deliverables = [], isLoading: isDeliverablesLoading } = useBriefDeliverables(id);
+  const { mutate: updateBriefStatus, isPending: isUpdatingStatus } = useUpdateBriefStatus();
+  const { mutate: addDeliverable, isPending: isAddingDeliverable } = useAddDeliverable();
+
+
+  
+  const navigate = useNavigate();
   const [newDeliverable, setNewDeliverable] = useState({
     title: '',
     description: '',
     link: '',
-    type: 'figma' as Deliverable['type']
+    type: 'FIGMA' as Deliverable['type']
   });
-  const [isAddingDeliverable, setIsAddingDeliverable] = useState(false);
 
-  const brief = getBriefById(id);
+  // Check admin role and redirect if not admin
+  useEffect(() => {
+    if (user && user.role !== 'ADMIN') {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
-  if (!brief) {
+
+
+  // Show loading state
+  if (briefLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (briefError || !brief) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground">Brief not found</h1>
-            <p className="mt-2 text-muted-foreground">The requested brief could not be found.</p>
+            <p className="mt-2 text-muted-foreground">
+              {briefError ? 'Failed to load brief data.' : 'The requested brief could not be found.'}
+            </p>
             <Link to="/admin">
               <Button className="mt-4">Back to Admin Dashboard</Button>
             </Link>
@@ -48,11 +78,22 @@ const AdminBriefManagement: React.FC = () => {
     );
   }
 
-  const handleStatusUpdate = (newStatus: Brief['status']) => {
-    updateBriefStatus(brief.id, newStatus);
-    toast({
-      title: "Status updated",
-      description: `Brief status changed to ${newStatus.replace('-', ' ')}`,
+  const handleStatusUpdate = (newStatus: string) => {
+    updateBriefStatus({ briefId: brief.id, status: newStatus }, {
+      onSuccess: () => {
+        toast({
+          title: "Status updated",
+          description: `Brief status changed to ${newStatus.replace('_', ' ').toLowerCase()}`,
+        });
+      },
+      onError: (error) => {
+        console.error('Failed to update brief status:', error);
+        toast({
+          title: "Error updating status",
+          description: "Failed to update brief status. Please try again.",
+          variant: "destructive",
+        });
+      }
     });
   };
 
@@ -66,40 +107,39 @@ const AdminBriefManagement: React.FC = () => {
       return;
     }
 
-    setIsAddingDeliverable(true);
-    try {
-      addDeliverable(brief.id, {
-        briefId: brief.id,
-        title: newDeliverable.title,
-        description: newDeliverable.description,
-        link: newDeliverable.link,
-        type: newDeliverable.type
-      });
-      
-      setNewDeliverable({
-        title: '',
-        description: '',
-        link: '',
-        type: 'figma'
-      });
-      
-      toast({
-        title: "Deliverable added",
-        description: "The deliverable has been added to the project",
-      });
-    } catch (error) {
-      toast({
-        title: "Error adding deliverable",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAddingDeliverable(false);
-    }
+    addDeliverable({
+      briefId: brief.id,
+      title: newDeliverable.title,
+      description: newDeliverable.description,
+      link: newDeliverable.link,
+      type: newDeliverable.type
+    }, {
+      onSuccess: () => {
+        setNewDeliverable({
+          title: '',
+          description: '',
+          link: '',
+          type: 'FIGMA'
+        });
+        
+        toast({
+          title: "Deliverable added",
+          description: "The deliverable has been added to the project",
+        });
+      },
+      onError: (error) => {
+        console.error('Failed to add deliverable:', error);
+        toast({
+          title: "Error adding deliverable",
+          description: "Failed to add deliverable. Please try again.",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
-  if (user?.role !== 'admin') {
-    navigate('/dashboard');
+  // Early return if user is not admin (after the useEffect handles redirect)
+  if (user?.role !== 'ADMIN') {
     return null;
   }
 
@@ -152,33 +192,33 @@ const AdminBriefManagement: React.FC = () => {
                 <Label>Update Status</Label>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <Button
-                    variant={brief.status === 'pending' ? 'default' : 'outline'}
-                    onClick={() => handleStatusUpdate('pending')}
-                    disabled={brief.status === 'pending'}
+                    variant={brief.status === 'PENDING' ? 'default' : 'outline'}
+                    onClick={() => handleStatusUpdate('PENDING')}
+                    disabled={brief.status === 'PENDING'}
                     size="sm"
                   >
                     Pending
                   </Button>
                   <Button
-                    variant={brief.status === 'reviewed' ? 'default' : 'outline'}
-                    onClick={() => handleStatusUpdate('reviewed')}
-                    disabled={brief.status === 'reviewed'}
+                    variant={brief.status === 'REVIEWED' ? 'default' : 'outline'}
+                    onClick={() => handleStatusUpdate('REVIEWED')}
+                    disabled={brief.status === 'REVIEWED'}
                     size="sm"
                   >
                     Reviewed
                   </Button>
                   <Button
-                    variant={brief.status === 'in-progress' ? 'default' : 'outline'}
-                    onClick={() => handleStatusUpdate('in-progress')}
-                    disabled={brief.status === 'in-progress'}
+                    variant={brief.status === 'IN_PROGRESS' ? 'default' : 'outline'}
+                    onClick={() => handleStatusUpdate('IN_PROGRESS')}
+                    disabled={brief.status === 'IN_PROGRESS'}
                     size="sm"
                   >
                     In Progress
                   </Button>
                   <Button
-                    variant={brief.status === 'completed' ? 'default' : 'outline'}
-                    onClick={() => handleStatusUpdate('completed')}
-                    disabled={brief.status === 'completed'}
+                    variant={brief.status === 'COMPLETED' ? 'default' : 'outline'}
+                    onClick={() => handleStatusUpdate('COMPLETED')}
+                    disabled={brief.status === 'COMPLETED'}
                     size="sm"
                   >
                     Completed
@@ -243,10 +283,10 @@ const AdminBriefManagement: React.FC = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="figma">Figma Design</SelectItem>
-                    <SelectItem value="prototype">Prototype</SelectItem>
-                    <SelectItem value="website">Website</SelectItem>
-                    <SelectItem value="document">Document</SelectItem>
+                    <SelectItem value="FIGMA">Figma Design</SelectItem>
+                    <SelectItem value="PROTOTYPE">Prototype</SelectItem>
+                    <SelectItem value="WEBSITE">Website</SelectItem>
+                    <SelectItem value="DOCUMENT">Document</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -264,7 +304,7 @@ const AdminBriefManagement: React.FC = () => {
         </div>
 
         {/* Current Deliverables */}
-        {brief.deliverables.length > 0 && (
+        {deliverables && deliverables.length > 0 && (
           <Card className="bg-card shadow-lg mt-8">
             <CardHeader>
               <CardTitle>Current Deliverables</CardTitle>
@@ -274,7 +314,7 @@ const AdminBriefManagement: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {brief.deliverables.map((deliverable) => (
+                {deliverables.map((deliverable) => (
                   <div key={deliverable.id} className="border rounded-lg p-4">
                     <div className="flex items-start justify-between">
                       <div>

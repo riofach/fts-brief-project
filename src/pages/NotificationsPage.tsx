@@ -7,23 +7,29 @@ import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/layout/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApp } from '@/contexts/AppContext';
-import { Notification } from '@/data/mockData';
+import type { Notification } from '@/api/types';
 
 const NotificationsPage: React.FC = () => {
   const { user } = useAuth();
-  const { notifications, markNotificationAsRead, getBriefById } = useApp();
+  const { 
+    notifications, 
+    markNotificationAsRead, 
+    markAllNotificationsAsRead,
+    getBriefById,
+    unreadNotificationsCount
+  } = useApp();
   
-  const userNotifications = notifications
-    .filter(n => n.userId === user?.id)
+  // Note: Notifications are already filtered by user in the backend
+  const sortedNotifications = [...notifications]
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
-      case 'status_update':
+      case 'STATUS_UPDATE':
         return <CheckCircle2 className="h-5 w-5 text-primary" />;
-      case 'new_message':
+      case 'NEW_MESSAGE':
         return <MessageSquare className="h-5 w-5 text-blue-500" />;
-      case 'deliverable_added':
+      case 'DELIVERABLE_ADDED':
         return <FileText className="h-5 w-5 text-green-500" />;
       default:
         return <Bell className="h-5 w-5 text-muted-foreground" />;
@@ -37,12 +43,8 @@ const NotificationsPage: React.FC = () => {
   };
 
   const markAllAsRead = () => {
-    userNotifications
-      .filter(n => !n.isRead)
-      .forEach(n => markNotificationAsRead(n.id));
+    markAllNotificationsAsRead();
   };
-
-  const unreadCount = userNotifications.filter(n => !n.isRead).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,7 +54,7 @@ const NotificationsPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <Link 
-            to={user?.role === 'admin' ? '/admin' : '/dashboard'}
+            to={user?.role === 'ADMIN' ? '/admin' : '/dashboard'}
             className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -69,10 +71,10 @@ const NotificationsPage: React.FC = () => {
                 Stay updated with your project progress
               </p>
             </div>
-            {unreadCount > 0 && (
+            {unreadNotificationsCount > 0 && (
               <div className="mt-4 sm:mt-0">
                 <Button onClick={markAllAsRead} variant="outline">
-                  Mark all as read ({unreadCount})
+                  Mark all as read ({unreadNotificationsCount})
                 </Button>
               </div>
             )}
@@ -84,14 +86,14 @@ const NotificationsPage: React.FC = () => {
           <CardHeader>
             <CardTitle>All Notifications</CardTitle>
             <CardDescription>
-              {userNotifications.length === 0 
+              {sortedNotifications.length === 0 
                 ? "No notifications yet" 
-                : `${userNotifications.length} total notifications`
+                : `${sortedNotifications.length} total notifications`
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {userNotifications.length === 0 ? (
+            {sortedNotifications.length === 0 ? (
               <div className="text-center py-12">
                 <Bell className="mx-auto h-12 w-12 text-muted-foreground" />
                 <h3 className="mt-4 text-lg font-semibold text-foreground">No notifications</h3>
@@ -101,13 +103,13 @@ const NotificationsPage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {userNotifications.map((notification) => {
+                {sortedNotifications.map((notification) => {
                   const brief = getBriefById(notification.briefId);
                   
                   return (
                     <Link
                       key={notification.id}
-                      to={`${user?.role === 'admin' ? '/admin' : ''}/brief/${notification.briefId}`}
+                      to={`${user?.role === 'ADMIN' ? '/admin' : ''}/brief/${notification.briefId}`}
                       onClick={() => handleNotificationClick(notification)}
                     >
                       <div className={`border rounded-lg p-4 transition-colors hover:bg-muted/30 ${

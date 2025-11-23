@@ -1,25 +1,38 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Brief, Discussion, Notification, Deliverable, mockBriefs, mockDiscussions, mockNotifications } from '../data/mockData';
+import React, { createContext, useContext } from 'react';
+import { Brief, Discussion, Notification, Deliverable } from '../api/types';
+import { 
+  useBriefs, 
+  useCreateBrief, 
+  useUpdateBriefStatus, 
+  useAddDeliverable,
+  usePostDiscussion,
+  useNotifications,
+  useMarkNotificationRead,
+  useMarkAllNotificationsRead,
+  useUnreadNotificationsCount
+} from '../api';
 import { useAuth } from './AuthContext';
 
 interface AppContextType {
   briefs: Brief[];
   discussions: Discussion[];
   notifications: Notification[];
+  isLoading: boolean;
+  unreadNotificationsCount: number;
   
   // Brief operations
-  createBrief: (briefData: Omit<Brief, 'id' | 'createdAt' | 'updatedAt' | 'deliverables'>) => string;
-  updateBriefStatus: (briefId: string, status: Brief['status']) => void;
-  addDeliverable: (briefId: string, deliverable: Omit<Deliverable, 'id' | 'addedAt'>) => void;
+  createBrief: (briefData: Omit<Brief, 'id' | 'createdAt' | 'updatedAt' | 'deliverables' | 'clientId'>) => Promise<string>;
+  updateBriefStatus: (briefId: string, status: Brief['status']) => Promise<void>;
+  addDeliverable: (briefId: string, deliverable: Omit<Deliverable, 'id' | 'addedAt' | 'briefId'>) => Promise<void>;
   
   // Discussion operations
-  addDiscussion: (briefId: string, message: string) => void;
+  addDiscussion: (briefId: string, message: string) => Promise<void>;
   
   // Notification operations
-  markNotificationAsRead: (notificationId: string) => void;
-  getUnreadNotifications: () => Notification[];
+  markNotificationAsRead: (notificationId: string) => Promise<void>;
+  markAllNotificationsAsRead: () => Promise<void>;
   
-  // Data fetching
+  // Data fetching helpers
   getBriefById: (id: string) => Brief | undefined;
   getBriefsByClientId: (clientId: string) => Brief[];
   getDiscussionsByBriefId: (briefId: string) => Discussion[];
@@ -37,142 +50,48 @@ export const useApp = () => {
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [briefs, setBriefs] = useState<Brief[]>(mockBriefs);
-  const [discussions, setDiscussions] = useState<Discussion[]>(mockDiscussions);
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const isAuthenticated = !!user;
+  
+  // Use real API hooks, enabled only when authenticated
+  const { data: briefs = [], isLoading: briefsLoading } = useBriefs(isAuthenticated);
+  
+  // Note: Discussions are now fetched per brief in the components, 
+  // so we don't fetch global discussions here to avoid over-fetching
+  const discussions: Discussion[] = []; 
+  
+  const { data: notifications = [] } = useNotifications(isAuthenticated);
+  const { data: unreadCount = 0 } = useUnreadNotificationsCount(isAuthenticated);
+  
+  const createBriefMutation = useCreateBrief();
+  const updateBriefStatusMutation = useUpdateBriefStatus();
+  const addDeliverableMutation = useAddDeliverable();
+  const postDiscussionMutation = usePostDiscussion();
+  const markReadMutation = useMarkNotificationRead();
+  const markAllReadMutation = useMarkAllNotificationsRead();
 
-  const createBrief = (briefData: Omit<Brief, 'id' | 'createdAt' | 'updatedAt' | 'deliverables'>): string => {
-    const newBrief: Brief = {
-      ...briefData,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      deliverables: []
-    };
-    
-    setBriefs(prev => [...prev, newBrief]);
-    
-    // Create notification for admins
-    const adminNotification: Notification = {
-      id: Math.random().toString(36).substr(2, 9),
-      userId: '1', // Admin user ID
-      briefId: newBrief.id,
-      title: 'New Project Brief',
-      message: `${user?.name} submitted a new project brief: ${newBrief.projectName}`,
-      isRead: false,
-      timestamp: new Date().toISOString(),
-      type: 'status_update'
-    };
-    
-    setNotifications(prev => [...prev, adminNotification]);
-    
-    return newBrief.id;
+  const createBrief = async (briefData: any): Promise<string> => {
+    const result = await createBriefMutation.mutateAsync(briefData);
+    return result.id;
   };
 
-  const updateBriefStatus = (briefId: string, status: Brief['status']) => {
-    setBriefs(prev => prev.map(brief => 
-      brief.id === briefId 
-        ? { ...brief, status, updatedAt: new Date().toISOString() }
-        : brief
-    ));
-    
-    // Create notification for client
-    const brief = briefs.find(b => b.id === briefId);
-    if (brief) {
-      const clientNotification: Notification = {
-        id: Math.random().toString(36).substr(2, 9),
-        userId: brief.clientId,
-        briefId,
-        title: 'Status Updated',
-        message: `Your project "${brief.projectName}" status changed to ${status.replace('-', ' ')}`,
-        isRead: false,
-        timestamp: new Date().toISOString(),
-        type: 'status_update'
-      };
-      
-      setNotifications(prev => [...prev, clientNotification]);
-    }
+  const updateBriefStatus = async (briefId: string, status: Brief['status']) => {
+    await updateBriefStatusMutation.mutateAsync({ id: briefId, status });
   };
 
-  const addDeliverable = (briefId: string, deliverable: Omit<Deliverable, 'id' | 'addedAt'>) => {
-    const newDeliverable: Deliverable = {
-      ...deliverable,
-      id: Math.random().toString(36).substr(2, 9),
-      addedAt: new Date().toISOString()
-    };
-    
-    setBriefs(prev => prev.map(brief => 
-      brief.id === briefId 
-        ? { 
-            ...brief, 
-            deliverables: [...brief.deliverables, newDeliverable],
-            updatedAt: new Date().toISOString()
-          }
-        : brief
-    ));
-    
-    // Create notification for client
-    const brief = briefs.find(b => b.id === briefId);
-    if (brief) {
-      const clientNotification: Notification = {
-        id: Math.random().toString(36).substr(2, 9),
-        userId: brief.clientId,
-        briefId,
-        title: 'New Deliverable',
-        message: `${deliverable.title} has been added to your project`,
-        isRead: false,
-        timestamp: new Date().toISOString(),
-        type: 'deliverable_added'
-      };
-      
-      setNotifications(prev => [...prev, clientNotification]);
-    }
+  const addDeliverable = async (briefId: string, deliverable: any) => {
+    await addDeliverableMutation.mutateAsync({ briefId, ...deliverable });
   };
 
-  const addDiscussion = (briefId: string, message: string) => {
-    if (!user) return;
-    
-    const newDiscussion: Discussion = {
-      id: Math.random().toString(36).substr(2, 9),
-      briefId,
-      userId: user.id,
-      message,
-      timestamp: new Date().toISOString(),
-      isFromAdmin: user.role === 'admin'
-    };
-    
-    setDiscussions(prev => [...prev, newDiscussion]);
-    
-    // Create notification for the other party
-    const brief = briefs.find(b => b.id === briefId);
-    if (brief) {
-      const targetUserId = user.role === 'admin' ? brief.clientId : '1'; // Admin user ID
-      const notification: Notification = {
-        id: Math.random().toString(36).substr(2, 9),
-        userId: targetUserId,
-        briefId,
-        title: 'New Message',
-        message: `${user.name} sent a new message on "${brief.projectName}"`,
-        isRead: false,
-        timestamp: new Date().toISOString(),
-        type: 'new_message'
-      };
-      
-      setNotifications(prev => [...prev, notification]);
-    }
+  const addDiscussion = async (briefId: string, message: string) => {
+    await postDiscussionMutation.mutateAsync({ briefId, message });
   };
 
-  const markNotificationAsRead = (notificationId: string) => {
-    setNotifications(prev => prev.map(notification =>
-      notification.id === notificationId
-        ? { ...notification, isRead: true }
-        : notification
-    ));
+  const markNotificationAsRead = async (notificationId: string) => {
+    await markReadMutation.mutateAsync(notificationId);
   };
-
-  const getUnreadNotifications = (): Notification[] => {
-    if (!user) return [];
-    return notifications.filter(n => n.userId === user.id && !n.isRead);
+  
+  const markAllNotificationsAsRead = async () => {
+    await markAllReadMutation.mutateAsync();
   };
 
   const getBriefById = (id: string): Brief | undefined => {
@@ -184,6 +103,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const getDiscussionsByBriefId = (briefId: string): Discussion[] => {
+    // Only returns discussions if we had them in state, mostly for backward compat
     return discussions.filter(discussion => discussion.briefId === briefId);
   };
 
@@ -192,12 +112,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       briefs,
       discussions,
       notifications,
+      isLoading: briefsLoading,
+      unreadNotificationsCount: unreadCount,
       createBrief,
       updateBriefStatus,
       addDeliverable,
       addDiscussion,
       markNotificationAsRead,
-      getUnreadNotifications,
+      markAllNotificationsAsRead,
       getBriefById,
       getBriefsByClientId,
       getDiscussionsByBriefId

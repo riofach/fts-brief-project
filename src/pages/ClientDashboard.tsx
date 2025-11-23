@@ -6,13 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Navbar } from '@/components/layout/Navbar';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
-import { useApp } from '@/contexts/AppContext';
+import { useBriefsByClient } from '@/api';
+import { useNavigate } from 'react-router-dom';
 
 const ClientDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { getBriefsByClientId } = useApp();
+  const isAuthenticated = !!user;
   
-  const userBriefs = user ? getBriefsByClientId(user.id) : [];
+  // Use TanStack Query to fetch user's briefs, only when authenticated
+  const { data: userBriefs = [], isLoading: briefsLoading, error: briefsError } = useBriefsByClient(user?.id, isAuthenticated);
+  const navigate = useNavigate();
   
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -40,6 +43,41 @@ const ClientDashboard: React.FC = () => {
   };
 
   const stats = getStatusStats();
+
+  // Show loading state
+  if (briefsLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (briefsError) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground">Error loading briefs</h1>
+            <p className="text-muted-foreground mt-2">Failed to load your project briefs. Please try again.</p>
+            <Button 
+              className="mt-4" 
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

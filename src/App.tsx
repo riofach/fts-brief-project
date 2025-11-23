@@ -2,9 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./contexts/AuthContext";
+import { useAuth, AuthProvider } from "./contexts/AuthContext";
 import { AppProvider } from "./contexts/AppContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
+import LoadingState from "@/components/common/LoadingState";
 
 // Pages
 import LandingPage from "./pages/LandingPage";
@@ -26,11 +28,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: 'ADMI
   
   // Show nothing while loading
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
+    return <LoadingState fullScreen />;
   }
   
   // Redirect to login if not authenticated
@@ -57,9 +55,7 @@ const AppRoutes = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={
         isLoading ? (
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
+          <LoadingState fullScreen />
         ) : user ? (
           <Navigate to={user.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />
         ) : (
@@ -108,7 +104,7 @@ const AppRoutes = () => {
       
       {/* Notifications routes */}
       <Route path="/notifications" element={
-        <ProtectedRoute requiredRole="CLIENT">
+        <ProtectedRoute>
           <NotificationsPage />
         </ProtectedRoute>
       } />
@@ -125,9 +121,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppProvider>
-          <AppRoutes />
-        </AppProvider>
+        <AuthProvider>
+          <AppProvider>
+            <ErrorBoundary>
+              <AppRoutes />
+            </ErrorBoundary>
+          </AppProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </ThemeProvider>

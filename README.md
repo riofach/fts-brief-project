@@ -1,73 +1,88 @@
-# Welcome to your Lovable project
+# FTS Brief Management System
 
-## Project info
+A full-stack application for managing web design/development briefs. This system enables clients to submit project briefs and admins to manage, track, and collaborate on those projects.
 
-**URL**: https://lovable.dev/projects/122c039c-11fe-40db-b4c2-f0c6394bc069
+## Project Architecture
 
-## How can I edit this code?
+- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS
+- **Backend**: Node.js + Express + PostgreSQL + Prisma
+- **State Management**: TanStack Query (React Query)
+- **Authentication**: JWT-based auth with role management
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/122c039c-11fe-40db-b4c2-f0c6394bc069) and start prompting.
+- Node.js (v18+)
+- PostgreSQL Database
 
-Changes made via Lovable will be committed automatically to this repo.
+### Backend Setup
 
-**Use your preferred IDE**
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. Set up environment variables:
+   - Copy `.env.example` to `.env`
+   - Update the `DATABASE_URL` and `JWT_SECRET`
 
-Follow these steps:
+4. Initialize the database:
+   ```bash
+   npx prisma migrate dev
+   npx prisma db seed
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+5. Start the backend server:
+   ```bash
+   npm run dev
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Frontend Setup
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Navigate to the project root:
+   ```bash
+   cd .
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-**Edit a file directly in GitHub**
+3. Set up environment variables:
+   - Create a `.env` file in the root directory
+   - Add `VITE_API_URL=http://localhost:3000/api` (or your backend URL)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-**Use GitHub Codespaces**
+## Features
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Authentication**: Secure login for Clients and Admins
+- **Brief Management**: Create, view, update, and track project briefs
+- **Real-time Discussions**: Messaging system for each brief
+- **Deliverables**: Admin-managed file/link sharing
+- **Notifications**: Real-time updates for status changes and messages
 
-## What technologies are used for this project?
+## API Integration
 
-This project is built with:
+The frontend communicates with the backend via a centralized API client (`src/api/client.ts`) using Axios and TanStack Query.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Authentication**: Tokens are stored in localStorage and automatically attached to requests.
+- **Error Handling**: Global error boundaries and toast notifications handle API failures.
+- **Optimistic Updates**: UI updates immediately for better perceived performance.
 
-## How can I deploy this project?
+## Development
 
-Simply open [Lovable](https://lovable.dev/projects/122c039c-11fe-40db-b4c2-f0c6394bc069) and click on Share -> Publish.
+- **Frontend Port**: 8080 (default)
+- **Backend Port**: 3000 (default)
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+For detailed documentation, see `openspec/project.md`.

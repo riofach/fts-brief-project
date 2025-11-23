@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Upload, Plus, X } from 'lucide-react';
+import { ArrowLeft, Plus, X, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,13 +10,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Navbar } from '@/components/layout/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useApp } from '@/contexts/AppContext';
+import { useCreateBrief } from '@/api';
 import { websiteTypes, fontPreferences, moodThemes } from '@/data/mockData';
 import { toast } from '@/hooks/use-toast';
 
 const CreateBrief: React.FC = () => {
   const { user } = useAuth();
-  const { createBrief } = useApp();
+  const { mutate: createBrief, isPending: isCreating } = useCreateBrief();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -91,8 +91,7 @@ const CreateBrief: React.FC = () => {
       // Filter out empty reference links
       const referenceLinks = formData.referenceLinks.filter(link => link.trim() !== '');
       
-      const briefId = createBrief({
-        clientId: user.id,
+      createBrief({
         projectName: formData.projectName,
         projectDescription: formData.projectDescription,
         websiteType: formData.websiteType,
@@ -105,24 +104,33 @@ const CreateBrief: React.FC = () => {
         referenceLinks,
         logoAssets: formData.logoAssets || undefined,
         additionalNotes: formData.additionalNotes || undefined,
-        status: 'pending'
+      }, {
+        onSuccess: () => {
+          toast({
+            title: "Brief created successfully!",
+            description: "Your project brief has been submitted for review",
+          });
+          navigate('/dashboard');
+        },
+        onError: (error) => {
+          console.error('Failed to create brief:', error);
+          toast({
+            title: "Error creating brief",
+            description: "Something went wrong. Please try again.",
+            variant: "destructive",
+          });
+        }
       });
-
-      toast({
-        title: "Brief created successfully!",
-        description: "Your project brief has been submitted for review",
-      });
-
-      navigate('/dashboard');
-    } catch (error) {
-      toast({
-        title: "Error creating brief",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  } catch (error) {
+    // This catch block is for form validation errors
+    toast({
+      title: "Error creating brief",
+      description: "Something went wrong. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
   };
 
   return (
@@ -342,27 +350,18 @@ const CreateBrief: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="logoAssets">Logo/Assets</Label>
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <div className="mt-4">
-                    <Label htmlFor="logoAssets" className="cursor-pointer">
-                      <span className="mt-2 block text-sm font-medium text-foreground">
-                        Upload logo and brand assets
-                      </span>
-                      <span className="mt-1 block text-sm text-muted-foreground">
-                        PNG, JPG, PDF up to 10MB (Mock upload)
-                      </span>
-                    </Label>
-                    <Input
-                      id="logoAssets"
-                      type="text"
-                      placeholder="logo-files.zip (simulated upload)"
-                      value={formData.logoAssets}
-                      onChange={(e) => handleInputChange('logoAssets', e.target.value)}
-                      className="mt-2"
-                    />
-                  </div>
+                <Label htmlFor="logoAssets">Assets Link (Google Drive / Dropbox)</Label>
+                <div className="border rounded-lg p-4 bg-muted/30">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Please upload your logo files, brand assets, and other supporting documents to a cloud storage service (like Google Drive, Dropbox, or WeTransfer) and paste the shareable link here.
+                  </p>
+                  <Input
+                    id="logoAssets"
+                    type="url"
+                    placeholder="https://drive.google.com/drive/folders/..."
+                    value={formData.logoAssets}
+                    onChange={(e) => handleInputChange('logoAssets', e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -386,8 +385,8 @@ const CreateBrief: React.FC = () => {
                 Cancel
               </Button>
             </Link>
-            <Button type="submit" disabled={isSubmitting} className="shadow-glow">
-              {isSubmitting ? 'Creating Brief...' : 'Create Brief'}
+            <Button type="submit" disabled={isSubmitting || isCreating} className="shadow-glow">
+              {isSubmitting || isCreating ? 'Creating Brief...' : 'Create Brief'}
             </Button>
           </div>
         </form>

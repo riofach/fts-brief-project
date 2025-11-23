@@ -1,7 +1,29 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 // Create a client with sensible defaults
 export const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      // Only show toast for 5xx server errors on queries to avoid spamming
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status && axiosError.response.status >= 500) {
+        toast.error('Server Error', {
+          description: 'Something went wrong on the server. Please try again later.',
+        });
+      }
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error: any) => {
+      // Show toast for all mutation errors (user actions)
+      const message = error.response?.data?.error?.message || error.message || 'An error occurred';
+      toast.error('Error', {
+        description: message,
+      });
+    },
+  }),
   defaultOptions: {
     queries: {
       // Data is considered fresh for 5 minutes
@@ -46,6 +68,7 @@ export const queryKeys = {
     lists: () => [...queryKeys.discussions.all, 'list'] as const,
     list: (filters?: string) => [...queryKeys.discussions.lists(), filters] as const,
     detail: (id: string) => [...queryKeys.discussions.all, 'detail', id] as const,
+    byBrief: (briefId: string) => ['discussions-by-brief', briefId] as const,
     my: ['discussions', 'my'] as const,
     search: (params?: string) => [...queryKeys.discussions.all, 'search', params] as const,
   },
@@ -61,8 +84,17 @@ export const queryKeys = {
   // Deliverables
   deliverables: {
     all: ['deliverables'] as const,
-    lists: () => [...queryKeys.deliverables.all, 'list'] as const,
-    list: (briefId: string) => [...queryKeys.deliverables.lists(), briefId] as const,
+    lists: () => ['deliverables', 'list'] as const,
+    list: (briefId: string) => ['deliverables', 'list', briefId] as const,
+  },
+  
+  // Users
+  users: {
+    all: ['users'] as const,
+    lists: () => ['users', 'list'] as const,
+    list: (filters?: string) => ['users', 'list', filters] as const,
+    details: () => ['users', 'detail'] as const,
+    detail: (id: string) => ['users', 'detail', id] as const,
   },
 } as const;
 
