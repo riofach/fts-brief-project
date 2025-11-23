@@ -105,8 +105,8 @@ export const usePostDiscussion = () => {
       queryClient.setQueryData<Discussion[]>(
         queryKeys.discussions.byBrief(variables.briefId),
         (oldDiscussions = []) => {
-          // Add new discussion to the beginning (most recent)
-          return [newDiscussion, ...oldDiscussions];
+          // Append new discussion to the end (chronological order)
+          return [...oldDiscussions, newDiscussion];
         }
       );
       
@@ -211,7 +211,7 @@ export const useOptimisticDiscussionUpdate = () => {
     // Add to the brief discussions cache
     queryClient.setQueryData<Discussion[]>(
       queryKeys.discussions.byBrief(briefId),
-      (oldDiscussions = []) => [tempDiscussion, ...oldDiscussions]
+      (oldDiscussions = []) => [...oldDiscussions, tempDiscussion]
     );
   };
   
