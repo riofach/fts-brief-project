@@ -1,5 +1,5 @@
 ---
-description: writing-plans after brainstorming
+description: writing-plans
 ---
 
 ---

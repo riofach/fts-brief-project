@@ -1,5 +1,5 @@
 ---
-description: executing-plans after writing-plans
+description: executing-plans
 ---
 
 ---

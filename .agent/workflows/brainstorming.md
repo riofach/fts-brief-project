@@ -1,5 +1,5 @@
 ---
-description: brainstorming before writing plans
+description: brainstorming
 ---
 
 ---
